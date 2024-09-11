@@ -25,7 +25,7 @@ public class DataGroup1 : DataGroup {
 
     public override var datagroupType: DataGroupId { .DG1 }
     
-    required init( _ data : [UInt8] ) throws {
+    public required init( _ data : [UInt8] ) throws {
         try super.init(data)
     }
     

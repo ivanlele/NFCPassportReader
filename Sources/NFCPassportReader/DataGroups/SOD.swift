@@ -60,7 +60,7 @@ import OpenSSL
 // AttributeValue ::= ANY
 // SignatureValue ::= OCTET STRING
 @available(iOS 13, macOS 10.15, *)
-class SOD : DataGroup {
+public class SOD : DataGroup {
     
     public private(set) var pkcs7CertificateData : [UInt8] = []
     private var asn1 : ASN1Item!
@@ -68,7 +68,7 @@ class SOD : DataGroup {
 
     override var datagroupType: DataGroupId { .SOD }
     
-    required init( _ data : [UInt8] ) throws {
+    public required init( _ data : [UInt8] ) throws {
         try super.init(data)
         self.pkcs7CertificateData = body
     }

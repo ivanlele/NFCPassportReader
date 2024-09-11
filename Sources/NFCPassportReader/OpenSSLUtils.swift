@@ -52,7 +52,7 @@ public class OpenSSLUtils {
         return str
     }
     
-    static func pubKeyToPEM( pubKey: OpaquePointer ) -> String {
+    public static func pubKeyToPEM( pubKey: OpaquePointer ) -> String {
         
         let out = BIO_new(BIO_s_mem())!
         defer { BIO_free( out) }
@@ -63,7 +63,7 @@ public class OpenSSLUtils {
         return str
     }
     
-    static func privKeyToPEM( privKey: OpaquePointer ) -> String {
+    public static func privKeyToPEM( privKey: OpaquePointer ) -> String {
         
         let out = BIO_new(BIO_s_mem())!
         defer { BIO_free( out) }
@@ -74,7 +74,7 @@ public class OpenSSLUtils {
         return str
     }
     
-    static func pkcs7DataToPEM( pkcs7: Data ) -> String {
+    public static func pkcs7DataToPEM( pkcs7: Data ) -> String {
         
         let inf = BIO_new(BIO_s_mem())!
         defer { BIO_free( inf) }
@@ -97,7 +97,7 @@ public class OpenSSLUtils {
     /// - Parameter pkcs7Der: The PKCS7 container in DER format
     /// - Returns: The PEM formatted X509 certificate
     /// - Throws: A OpenSSLError.UnableToGetX509CertificateFromPKCS7 are thrown for any error
-    static func getX509CertificatesFromPKCS7( pkcs7Der : Data ) throws -> [X509Wrapper] {
+    public static func getX509CertificatesFromPKCS7( pkcs7Der : Data ) throws -> [X509Wrapper] {
         
         guard let inf = BIO_new(BIO_s_mem()) else { throw OpenSSLError.UnableToGetX509CertificateFromPKCS7("Unable to allocate input buffer") }
         defer { BIO_free(inf) }
@@ -144,7 +144,7 @@ public class OpenSSLUtils {
     /// - Parameter x509Cert: The X509 certificate (in PEM format) to verify
     /// - Parameter CAFile: The URL path of a file containing the list of certificates used to try to discover and build a trust chain
     /// - Returns: either the X509 issue signing certificate that was used to sign the passed in X509 certificate or an error
-    static func verifyTrustAndGetIssuerCertificate( x509 : X509Wrapper, CAFile : URL ) -> Result<X509Wrapper, OpenSSLError> {
+    public static func verifyTrustAndGetIssuerCertificate( x509 : X509Wrapper, CAFile : URL ) -> Result<X509Wrapper, OpenSSLError> {
                 
         guard let cert_ctx = X509_STORE_new() else { return .failure(OpenSSLError.UnableToVerifyX509CertificateForSOD("Unable to create certificate store")) }
         defer { X509_STORE_free(cert_ctx) }
@@ -215,7 +215,7 @@ public class OpenSSLUtils {
     ///           the -noverify is don't verify against the signers certifcate (as we don' thave that!)
     ///
     ///      This should return Verification Successful and the signed data
-    static func verifyAndReturnSODEncapsulatedDataUsingCMS( sod : SOD ) throws -> Data {
+    public static func verifyAndReturnSODEncapsulatedDataUsingCMS( sod : SOD ) throws -> Data {
         
         guard let inf = BIO_new(BIO_s_mem()) else { throw OpenSSLError.VerifyAndReturnSODEncapsulatedData("CMS - Unable to allocate input buffer") }
         defer { BIO_free(inf) }
@@ -248,7 +248,7 @@ public class OpenSSLUtils {
     }
     
     
-    static func verifyAndReturnSODEncapsulatedData( sod : SOD ) throws -> Data {
+    public static func verifyAndReturnSODEncapsulatedData( sod : SOD ) throws -> Data {
         
         let encapsulatedContent = try sod.getEncapsulatedContent()
         let signedAttribsHashAlgo = try sod.getEncapsulatedContentDigestAlgorithm()
@@ -279,7 +279,7 @@ public class OpenSSLUtils {
     /// Parses a signed data structures encoded in ASN1 format and returns the structure in text format
     /// - Parameter data: The data to be parsed in ASN1 format
     /// - Returns: The parsed data as A String
-    static func ASN1Parse( data: Data ) throws -> String {
+    public static func ASN1Parse( data: Data ) throws -> String {
         
         guard let out = BIO_new(BIO_s_mem()) else { throw OpenSSLError.UnableToParseASN1("Unable to allocate output buffer") }
         defer { BIO_free(out) }
@@ -306,7 +306,7 @@ public class OpenSSLUtils {
     /// - Returns: The EVP_PKEY value
     /// NOTE THE CALLER IS RESPONSIBLE FOR FREEING THE RETURNED KEY USING
     /// EVP_PKEY_free(pemKey);
-    static func readRSAPublicKey( data : [UInt8] ) throws -> OpaquePointer? {
+    public static func readRSAPublicKey( data : [UInt8] ) throws -> OpaquePointer? {
         
         guard let inf = BIO_new(BIO_s_mem()) else { throw OpenSSLError.UnableToReadECPublicKey("Unable to allocate output buffer") }
         defer { BIO_free(inf) }
@@ -331,7 +331,7 @@ public class OpenSSLUtils {
     /// - Parameter signature: The RSA encrypted signature to decrypt
     /// - Parameter pubKey: The RSA Public Key
     /// - Returns: The decrypted signature data
-    static func decryptRSASignature( signature : Data, pubKey : OpaquePointer ) throws -> [UInt8] {
+    public static func decryptRSASignature( signature : Data, pubKey : OpaquePointer ) throws -> [UInt8] {
         
         let pad = RSA_NO_PADDING
         let rsa = EVP_PKEY_get1_RSA( pubKey )
@@ -360,7 +360,7 @@ public class OpenSSLUtils {
     /// - Returns: The EVP_PKEY value
     /// NOTE THE CALLER IS RESPONSIBLE FOR FREEING THE RETURNED KEY USING
     /// EVP_PKEY_free(pemKey);
-    static func readECPublicKey( data : [UInt8] ) throws -> OpaquePointer? {
+    public static func readECPublicKey( data : [UInt8] ) throws -> OpaquePointer? {
         
         guard let inf = BIO_new(BIO_s_mem()) else { throw OpenSSLError.UnableToReadECPublicKey("Unable to allocate output buffer") }
         defer { BIO_free(inf) }
@@ -386,7 +386,7 @@ public class OpenSSLUtils {
     /// - Parameter signature: The ECDSA signature to verify
     /// - Parameter data: The data used to generate the signature
     /// - Returns: True if the signature was verified
-    static func verifyECDSASignature( publicKey:OpaquePointer, signature: [UInt8], data: [UInt8], digestType: String = "" ) -> Bool {
+    public static func verifyECDSASignature( publicKey:OpaquePointer, signature: [UInt8], data: [UInt8], digestType: String = "" ) -> Bool {
                 
         // We first need to convert the signature from PLAIN ECDSA to ASN1 DER encoded
         let ecsig = ECDSA_SIG_new()
@@ -416,7 +416,7 @@ public class OpenSSLUtils {
     /// - Parameter publicKey: The OpenSSL EVP_PKEY  key
     /// - Parameter digestType: the type of hash to use (empty string to use no digest type)
     /// - Returns: True if the signature was verified
-    static func verifySignature( data : [UInt8], signature : [UInt8], pubKey : OpaquePointer, digestType: String ) -> Bool {
+    public static func verifySignature( data : [UInt8], signature : [UInt8], pubKey : OpaquePointer, digestType: String ) -> Bool {
         
         var digest = "sha256"
         let digestType = digestType.lowercased()
@@ -529,7 +529,7 @@ public class OpenSSLUtils {
     }
 
     @available(iOS 13, macOS 10.15, *)
-    static func generateAESCMAC( key: [UInt8], message : [UInt8] ) -> [UInt8] {
+    public static func generateAESCMAC( key: [UInt8], message : [UInt8] ) -> [UInt8] {
         let ctx = CMAC_CTX_new();
         defer { CMAC_CTX_free(ctx) }
         var key = key
@@ -553,7 +553,7 @@ public class OpenSSLUtils {
     }
     
     @available(iOS 13, macOS 10.15, *)
-    static func asn1EncodeOID (oid : String) -> [UInt8] {
+    public static func asn1EncodeOID (oid : String) -> [UInt8] {
         
         let obj = OBJ_txt2obj( oid.cString(using: .utf8), 1)
         let payloadLen = i2d_ASN1_OBJECT(obj, nil)
